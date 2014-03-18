@@ -102,7 +102,7 @@ public class FacebookGraphService extends AbstractJsonRestService {
         FacebookURIBuilder uriBuilder = fbURIBuilderFactory.createURIBuilder(params, getAccountIdComponent());
 
         uriBuilder.getEncodedParams();
-       
+        
         log.info(FacebookUtils.decode(uriBuilder.build().toString()));
         List<Ads_account> ads_accountList = callGETMethod(uriBuilder, new TypeReference<List<Ads_account>>() {
         });
