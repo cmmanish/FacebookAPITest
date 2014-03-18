@@ -1,0 +1,44 @@
+package Mar4API;
+
+import org.apache.log4j.Logger;
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+
+import java.io.IOException;
+import java.net.URI;
+import java.util.Collections;
+import java.util.Map;
+
+import org.springframework.web.client.RestTemplate;
+
+/**
+ * Created by mmadhusoodan on 3/7/14.
+ * 
+ * Base class for service calls to json/rest APIs
+ * It would have the GET POST DELETE
+ */
+public abstract class AbstractJsonRestService {
+
+    private final Logger log = Logger.getLogger(AbstractJsonRestService.class);
+
+    protected ObjectMapper jsonMapper;
+    protected RestTemplate restTemplate;
+
+    public AbstractJsonRestService() {
+
+        this.jsonMapper = new ObjectMapper();
+        restTemplate = new RestTemplate();
+
+    }
+
+    protected <T> T restCall(URI uri, Class<T> returnType) throws JsonGenerationException, JsonMappingException, IOException {
+
+        T response = null;
+        response = this.restTemplate.getForObject(uri, returnType);
+     
+        return (T) response;
+
+    }
+
+}
