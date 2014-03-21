@@ -66,11 +66,24 @@ public class FacebookGraphService extends AbstractJsonRestService {
         return ACCOUNT_PREFIX + String.valueOf(fca.getAccountId());
     }
 
-    public <T> List<T> callGETMethod(FacebookURIBuilder facebookUriBuilder, TypeReference<List<T>> typeReference) throws NullPointerException, URISyntaxException, JsonGenerationException,
+    public <T> T callGETMethod(FacebookURIBuilder facebookUriBuilder, Class<T> returnType) throws NullPointerException, URISyntaxException, JsonGenerationException, JsonMappingException, IOException {
+
+        URI uri = facebookUriBuilder.build();
+        String result = (String) restCall(uri, String.class);
+        log.info("result: " + result);
+
+        // Map<String, Object> response = this.jsonMapper.readValue(result, HashMap.class);
+        // log.info(response);
+        // List<T> returnList = new ArrayList<T>();
+        // String dataString = this.jsonMapper.writeValueAsString(response.get(DATA));
+        // return returnList;
+
+        return this.jsonMapper.readValue(result, returnType);
+    }
+
+    public <T> List<T> paginateCallGETMethod(FacebookURIBuilder facebookUriBuilder, TypeReference<List<T>> typeReference) throws NullPointerException, URISyntaxException, JsonGenerationException,
             JsonMappingException, IOException {
 
-        int lastBatchSize;
-        int totalSize = 0;
         URI uri = facebookUriBuilder.build();
         String result = (String) restCall(uri, String.class);
 
@@ -84,29 +97,28 @@ public class FacebookGraphService extends AbstractJsonRestService {
         List<T> moreData = this.jsonMapper.readValue(dataString, typeReference);
         if (!moreData.isEmpty()) {
             returnList.addAll(moreData);
-            // update the offset
-            lastBatchSize = moreData.size();
-            totalSize += lastBatchSize;
         }
         else {
-            lastBatchSize = 0;
         }
         return returnList;
 
     }
 
-    public void getAccountURI() throws NullPointerException, URISyntaxException, JsonGenerationException, JsonMappingException, IOException {
+    public void getAccount() throws NullPointerException, URISyntaxException, JsonGenerationException, JsonMappingException, IOException {
         Map<String, Object> params = new HashMap<String, Object>();
+        
         params.put(FIELDS_PARAM_NAME, FacebookFieldParamsUtil.getCommaSeparatedClassFieldNames(Ads_account.class));
         log.info("Params are: " + params);
         FacebookURIBuilder uriBuilder = fbURIBuilderFactory.createURIBuilder(params, getAccountIdComponent());
 
         uriBuilder.getEncodedParams();
-        
+
         log.info(FacebookUtils.decode(uriBuilder.build().toString()));
-        List<Ads_account> ads_accountList = callGETMethod(uriBuilder, new TypeReference<List<Ads_account>>() {
-        });
-        log.info(ads_accountList.get(1).getAccount_id());
+        Ads_account ads_account = callGETMethod(uriBuilder, Ads_account.class);
+
+        log.info(ads_account.getAccount_id());
+        log.info(ads_account.getName());
+        log.info(ads_account.getCurrency());
 
     }
 
@@ -119,9 +131,10 @@ public class FacebookGraphService extends AbstractJsonRestService {
      * @throws JsonGenerationException
      */
 
-    public void getAllCampaignsURI() throws URISyntaxException, JsonGenerationException, JsonMappingException, NullPointerException, IOException { // Marin Campaign
+    public void getAllCampaigns() throws URISyntaxException, JsonGenerationException, JsonMappingException, NullPointerException, IOException { // Marin Campaign
 
         Map<String, Object> params = new HashMap<String, Object>();
+        params.put(DATE_FORMAT_PARAM_KEY, DEFAULT_DATE_FORMAT);
         params.put(FIELDS_PARAM_NAME, FacebookFieldParamsUtil.getCommaSeparatedClassFieldNames(Ads_campaign_group.class));
 
         FacebookURIBuilder uriBuilder = fbURIBuilderFactory.createURIBuilder(params, getAccountIdComponent(), CAMPAIGN_GROUP_COMPONENT);
@@ -130,13 +143,33 @@ public class FacebookGraphService extends AbstractJsonRestService {
         // log.info("Path - " + uriBuilder.getPath());
         // log.info("URI "+uriBuilder.build().toString());
         log.info(FacebookUtils.decode(uriBuilder.build().toString()));
-        List<Ads_campaign_group> adCampaignGroupList = callGETMethod(uriBuilder, new TypeReference<List<Ads_campaign_group>>() {
+        List<Ads_campaign_group> adCampaignGroupList = paginateCallGETMethod(uriBuilder, new TypeReference<List<Ads_campaign_group>>() {
         });
 
         log.info(adCampaignGroupList.get(1).getId());
         log.info(adCampaignGroupList.get(1).getName());
         log.info(adCampaignGroupList.get(1).getCampaign_group_status());
-        // callGETMethod(uriBuilder, String.class);
+
+    }
+
+    public Ads_campaign_group getCampaign(long campaignId) throws Exception {
+    
+        // Ads_campaign_group
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put(DATE_FORMAT_PARAM_KEY, DEFAULT_DATE_FORMAT);
+        params.put(FIELDS_PARAM_NAME, FacebookFieldParamsUtil.getCommaSeparatedClassFieldNames(Ads_campaign_group.class));
+    
+        FacebookURIBuilder uriBuilder = fbURIBuilderFactory.createURIBuilder(params, new String[] { String.valueOf(campaignId) });
+        // log.info(uriBuilder.build().toString());
+        log.info(FacebookUtils.decode(uriBuilder.build().toString()));
+    
+        Ads_campaign_group adCampaignGroup = callGETMethod(uriBuilder, Ads_campaign_group.class);
+        log.info(adCampaignGroup.getAccount_id());
+        log.info(adCampaignGroup.getCampaign_group_status());
+        log.info(adCampaignGroup.getName());
+    
+        return adCampaignGroup;
+    
     }
 
     /**
@@ -148,10 +181,11 @@ public class FacebookGraphService extends AbstractJsonRestService {
      * @throws JsonMappingException
      * @throws JsonGenerationException
      */
-    public void getAllAdsetsURI() throws URISyntaxException, JsonGenerationException, JsonMappingException, NullPointerException, IOException { 
+    public void getAllAdsets() throws URISyntaxException, JsonGenerationException, JsonMappingException, NullPointerException, IOException {
         // Marin Group
 
         Map<String, Object> params = new HashMap<String, Object>();
+        params.put(DATE_FORMAT_PARAM_KEY, DEFAULT_DATE_FORMAT);
         params.put(FIELDS_PARAM_NAME, FacebookFieldParamsUtil.getCommaSeparatedClassFieldNames(Ads_campaign.class));
 
         FacebookURIBuilder uriBuilder = fbURIBuilderFactory.createURIBuilder(params, getAccountIdComponent(), CAMPAIGN_COMPONENT);
@@ -160,28 +194,48 @@ public class FacebookGraphService extends AbstractJsonRestService {
         // log.info("Path - " + uriBuilder.getPath());
         // log.info("URI "+uriBuilder.build().toString());
         log.info(FacebookUtils.decode(uriBuilder.build().toString()));
-        List<Ads_campaign> adSetsList = callGETMethod(uriBuilder, new TypeReference<List<Ads_campaign>>() {});
+        List<Ads_campaign> adSetsList = paginateCallGETMethod(uriBuilder, new TypeReference<List<Ads_campaign>>() {
+        });
 
-        log.info(adSetsList.get(1).getId());
-        log.info(adSetsList.get(1).getName());
-        log.info(adSetsList.get(1).getDaily_budget());
-        log.info(adSetsList.get(1).getLifetime_budget());
-        log.info(adSetsList.get(1).getStart_time());
-        log.info(adSetsList.get(1).getEnd_time());
+        int i = 0;
+        log.info(adSetsList.size());
+        log.info(adSetsList.get(i).getId());
+        log.info(adSetsList.get(i).getName());
+        log.info(adSetsList.get(i).getDaily_budget());
+        log.info(adSetsList.get(i).getLifetime_budget());
+        log.info(adSetsList.get(i).getStart_time());
+        log.info(adSetsList.get(i).getEnd_time());
 
     }
 
-    public void getCampaign(long campaignId) throws Exception {
-
-        // Ads_campaign_group
+    /**
+     * Get all of the adset under the given campaign.
+     * 
+     * @param campaignId
+     *        The external ID of the campaign
+     * @return List<Ads_campaign>
+     */
+    public List<Ads_campaign> getAllAdsetsInCampaign(long campaignId) throws Exception {
+       
         Map<String, Object> params = new HashMap<String, Object>();
         params.put(DATE_FORMAT_PARAM_KEY, DEFAULT_DATE_FORMAT);
-        params.put(FIELDS_PARAM_NAME, FacebookFieldParamsUtil.getCommaSeparatedClassFieldNames(Ads_campaign_group.class));
+        params.put(FIELDS_PARAM_NAME, FacebookFieldParamsUtil.getCommaSeparatedClassFieldNames(Ads_campaign.class));
+        // Need to retrieve all fields for an Ads_campaign, otherwise the latest data will not be retrieved from Facebook
 
-        FacebookURIBuilder uriBuilder = fbURIBuilderFactory.createURIBuilder(params, new String[] { String.valueOf(campaignId) });
-        // log.info(uriBuilder.build().toString());
+        FacebookURIBuilder uriBuilder = fbURIBuilderFactory.createURIBuilder(params, String.valueOf(campaignId), CAMPAIGN_COMPONENT);
+        uriBuilder.getEncodedParams();
+        // log.info("Host - " + uriBuilder.getHost());
+        // log.info("Path - " + uriBuilder.getPath());
+        // log.info("URI "+uriBuilder.build().toString());
         log.info(FacebookUtils.decode(uriBuilder.build().toString()));
-
+        
+        List<Ads_campaign> adSetsList = paginateCallGETMethod(uriBuilder, new TypeReference<List<Ads_campaign>>() {});
+        log.info(adSetsList.size());
+        log.info(adSetsList.get(0).getAccount_id());
+        log.info(adSetsList.get(0).getName());
+        log.info(adSetsList.get(0).getStart_time());
+        
+        return adSetsList;
     }
 
     /**
@@ -197,9 +251,15 @@ public class FacebookGraphService extends AbstractJsonRestService {
         params.put(FIELDS_PARAM_NAME, FacebookFieldParamsUtil.getCommaSeparatedClassFieldNames(Ads_campaign.class));
 
         FacebookURIBuilder uriBuilder = fbURIBuilderFactory.createURIBuilder(params, String.valueOf(adsetId));
-
-        // log.info(uriBuilder.build().toString());
         log.info(FacebookUtils.decode(uriBuilder.build().toString()));
+        Ads_campaign adCampaign = callGETMethod(uriBuilder, Ads_campaign.class);
+        log.info(adCampaign.getId());
+        log.info(adCampaign.getCampaign_group_id());
+        log.info(adCampaign.getName());
+        log.info(adCampaign.getCampaign_status());
+        log.info(adCampaign.getDaily_budget());
+        log.info(adCampaign.getLifetime_budget());
+
     }
 
     public void getAdsGroup(long groupId) throws Exception { // Ads_adgroup
@@ -211,5 +271,15 @@ public class FacebookGraphService extends AbstractJsonRestService {
 
         // log.info(uriBuilder.build().toString());
         log.info(FacebookUtils.decode(uriBuilder.build().toString()));
+        log.info(FacebookUtils.decode(uriBuilder.build().toString()));
+        Ads_adgroup adgroup = callGETMethod(uriBuilder, Ads_adgroup.class);
+        
+        log.info(adgroup.getId());
+        log.info(adgroup.getName());
+        log.info(adgroup.getAdgroup_status());
+        log.info(adgroup.getBid_info());
+        
+        
+        
     }
 }
