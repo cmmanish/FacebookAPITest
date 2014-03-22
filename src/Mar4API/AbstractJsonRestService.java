@@ -14,7 +14,7 @@ import org.springframework.web.client.RestTemplate;
 
 /**
  * Created by mmadhusoodan on 3/7/14.
- * 
+ * <p/>
  * Base class for service calls to json/rest APIs
  * It would have the GET POST DELETE
  */
@@ -34,10 +34,9 @@ public abstract class AbstractJsonRestService {
 
     protected <T> T restCall(URI uri, Class<T> returnType) throws JsonGenerationException, JsonMappingException, IOException {
 
-        T response = null;
-        response = this.restTemplate.getForObject(uri, returnType);
-     
-        return (T) response;
+        T response = this.restTemplate.getForObject(uri, returnType);
+
+        return response;
 
     }
 
