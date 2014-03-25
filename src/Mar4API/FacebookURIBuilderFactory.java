@@ -47,7 +47,6 @@ public class FacebookURIBuilderFactory  {
         uriBuilder.appendPathComponents(pathComponents);
         uriBuilder.addParameters(params);
         //log.info(uriBuilder.getEncodedParams());
-
         
         // Add access token as one of the params if not exist
         if (!uriBuilder.containsParameter(ACCESS_TOKEN_KEY)) {
