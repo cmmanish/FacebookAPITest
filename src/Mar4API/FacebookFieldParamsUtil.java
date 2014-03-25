@@ -92,7 +92,6 @@ public class FacebookFieldParamsUtil {
                     fieldNames.add(name);
                 }
             }
-            System.out.println(fieldNames.toArray());
             // Generate a comma separated string of field names
             commaSeparatedClassFieldNames = StringUtils.join(fieldNames.toArray(), COMMA_SEPERATOR);
             CACHED_CLASS_FIELD_NAMES.put(clazz, commaSeparatedClassFieldNames);
