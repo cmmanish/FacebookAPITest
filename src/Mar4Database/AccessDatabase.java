@@ -149,7 +149,7 @@ public class AccessDatabase {
         return rowUpdated;
     }
 
-    public int writeFacebookCampaign(String campaignName, long accountId, long extId, String status) throws Exception {
+    public int addFacebookCampaign(String campaignName, long accountId, long extId, String status) throws Exception {
 
         String insertTableSQL = " insert into facebook_campaigns" + "(campaign_name, account_id, ext_id, campaign_status,creation_date) " + "values " + "(?,?,?,?,?)";
 
