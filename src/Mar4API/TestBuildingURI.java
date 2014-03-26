@@ -115,7 +115,7 @@ public class TestBuildingURI {
 
         AccessDatabase accessDB = new AccessDatabase();
         for (int i = 0; i < size; i++) {
-            accessDB.writeFacebookCampaign(
+            accessDB.addFacebookCampaign(
                     adCampaignGroupList.get(i).getName(), 
                     adCampaignGroupList.get(i).getAccount_id(), 
                     adCampaignGroupList.get(i).getId(), 
