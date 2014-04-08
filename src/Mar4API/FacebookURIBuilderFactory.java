@@ -1,10 +1,10 @@
 package Mar4API;
 
+import org.apache.log4j.Logger;
+
 import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.log4j.Logger;
 
 /**
  * A factory to build facebook uri by given params and path components

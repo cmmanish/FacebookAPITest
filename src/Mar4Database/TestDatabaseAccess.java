@@ -1,9 +1,9 @@
 package Mar4Database;
 
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 import org.junit.Test;
+
+import java.util.Map;
 
 public class TestDatabaseAccess {
     private final Logger log = Logger.getLogger(TestDatabaseAccess.class);

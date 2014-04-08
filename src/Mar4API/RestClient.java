@@ -5,12 +5,8 @@ package Mar4API;
  */
 
 
-import org.springframework.web.client.RestTemplate;
-
-import com.facebook.api.Ads_account;
 import com.facebook.api.Ads_campaign_group;
-
-import java.util.*;
+import org.springframework.web.client.RestTemplate;
 
 
 public class RestClient

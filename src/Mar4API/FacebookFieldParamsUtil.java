@@ -1,14 +1,9 @@
 package Mar4API;
 
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.lang.StringUtils;
+
+import java.lang.reflect.Field;
+import java.util.*;
 
 /**
  * A Facebook fields param utility class

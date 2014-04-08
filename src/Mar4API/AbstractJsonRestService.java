@@ -4,13 +4,10 @@ import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Collections;
-import java.util.Map;
-
-import org.springframework.web.client.RestTemplate;
 
 /**
  * Created by mmadhusoodan on 3/7/14.

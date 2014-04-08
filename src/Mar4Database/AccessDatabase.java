@@ -1,18 +1,12 @@
 package Mar4Database;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.mysql.jdbc.PreparedStatement;
 
 import org.apache.log4j.Logger;
 
-import com.mysql.jdbc.PreparedStatement;
+import java.sql.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AccessDatabase {
 
@@ -91,6 +85,42 @@ public class AccessDatabase {
         }
         return campaign;
     }
+    
+    public int  getFacebookCampaignId(long campaignGroupId) throws NullPointerException, InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException{
+        
+       int facebookCampaignId = 0;
+        try {
+            log.info("Database connection established");
+            dbConnection = getDBConnection();
+            Statement statment = getDBConnection().createStatement();
+            String query = "select facebook_campaign_id from facebook_campaigns where ext_id = '" + campaignGroupId + "';";//
+            log.info("Query:  " + query);
+            statment.executeQuery(query);
+            ResultSet rs = statment.getResultSet();
+
+            while (rs.next()) {
+                facebookCampaignId = rs.getInt("facebook_campaign_id");
+            }
+            rs.close();
+            preparedStatement.close();
+        }
+        catch (Exception e) {
+            System.err.println();
+            log.info(e);
+        }
+        finally {
+            if (getDBConnection() != null) {
+                try {
+                    getDBConnection().close();
+                    log.info("Database connection terminated");
+                }
+                catch (Exception e) { /* ignore close errors */
+                }
+
+            }
+        }
+        return facebookCampaignId ;// Integer.parseInt(facebookCampaignId);
+    }
 
     public Map<String, String> readFacebookCampaign(String campaignName, long accountId) throws Exception {
 
@@ -151,7 +181,8 @@ public class AccessDatabase {
 
     public int addFacebookCampaign(String campaignName, long accountId, long extId, String status) throws Exception {
 
-        String insertTableSQL = " insert into facebook_campaigns" + "(campaign_name, account_id, ext_id, campaign_status,creation_date) " + "values " + "(?,?,?,?,?)";
+        String insertTableSQL = " insert into facebook_campaigns" + 
+        "(campaign_name, account_id, ext_id, campaign_status,creation_date) " + "values " + "(?,?,?,?,?)";
 
         try {
             dbConnection = getDBConnection();
@@ -162,7 +193,6 @@ public class AccessDatabase {
             preparedStatement.setString(4, status);
             preparedStatement.setTimestamp(5, getCurrentTimeStamp());
             rowUpdated = preparedStatement.executeUpdate();
-            log.info("Record is inserted into facebook_campaigns table! " + rowUpdated);
 
         }
         catch (SQLException e) {
@@ -184,4 +214,40 @@ public class AccessDatabase {
         return rowUpdated++;
     }
 
+    public int addFacebookGroup(int facebook_campaign_id, String groupName, long extId, String status,long dailyBudget) throws Exception {
+
+        String insertTableSQL ="insert into facebook_groups (facebook_campaign_id, group_name, ext_id, group_status, daily_budget, creation_date)  "
+                + "values"+ "(?, ?, ?, ?, ?, ?) ; ";
+               
+        log.info(insertTableSQL);
+        try {
+            dbConnection = getDBConnection();
+            preparedStatement = (PreparedStatement) dbConnection.prepareStatement(insertTableSQL);
+            preparedStatement.setInt(1, facebook_campaign_id);
+            preparedStatement.setString(2,  groupName);
+            preparedStatement.setLong(3, extId);
+            preparedStatement.setString(4, status);
+            preparedStatement.setLong(5, dailyBudget);
+            preparedStatement.setTimestamp(6, getCurrentTimeStamp());
+            rowUpdated = preparedStatement.executeUpdate();
+            
+        }
+        catch (SQLException e) {
+
+            System.out.println(e.getMessage());
+
+        }
+        finally {
+
+            if (preparedStatement != null) {
+                preparedStatement.close();
+            }
+
+            if (dbConnection != null) {
+                dbConnection.close();
+            }
+
+        }
+        return rowUpdated;
+    }
 }

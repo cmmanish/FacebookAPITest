@@ -1,10 +1,10 @@
 package Mar4API;
 
+import org.apache.log4j.Logger;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-
-import org.apache.log4j.Logger;
 
  /**
   * 

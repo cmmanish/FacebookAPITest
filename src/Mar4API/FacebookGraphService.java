@@ -4,11 +4,11 @@ import com.facebook.api.Ads_account;
 import com.facebook.api.Ads_adgroup;
 import com.facebook.api.Ads_campaign;
 import com.facebook.api.Ads_campaign_group;
-
 import org.apache.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.type.TypeReference;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -224,6 +224,7 @@ public class FacebookGraphService extends AbstractJsonRestService {
         params.put(FIELDS_PARAM_NAME, FacebookFieldParamsUtil.getCommaSeparatedClassFieldNames(Ads_campaign.class));
 
         FacebookURIBuilder uriBuilder = fbURIBuilderFactory.createURIBuilder(params, String.valueOf(adsetId));
+        log.info(uriBuilder.getPath());
         log.info(FacebookUtils.decode(uriBuilder.build().toString()));
         Ads_campaign adCampaign = callGETMethod(uriBuilder, Ads_campaign.class);
         

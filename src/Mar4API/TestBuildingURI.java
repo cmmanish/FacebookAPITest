@@ -1,16 +1,17 @@
 package Mar4API;
 
-import java.util.List;
+import Mar4Database.AccessDatabase;
+
+import com.facebook.api.Ads_adgroup;
+import com.facebook.api.Ads_campaign;
+import com.facebook.api.Ads_campaign_group;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
-import Mar4Database.AccessDatabase;
-
-import com.facebook.api.Ads_account;
-import com.facebook.api.Ads_adgroup;
-import com.facebook.api.Ads_campaign;
-import com.facebook.api.Ads_campaign_group;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class TestBuildingURI {
     private final Logger log = Logger.getLogger(TestBuildingURI.class);
@@ -18,24 +19,45 @@ public class TestBuildingURI {
     FacebookClientAccount fca = null;
     Long accountId = 53329000l;
 
-    String accessToken = "CAATqGuBpUXABAIMsM5y8T9iOS3EpKZA79bxZA0LNCRrHnAOKyM9tZAej48wHc244zC5871Nl62U5UlfZADVmkh6H5t4V16IWZALOD"
-            + "eXgvMsvxyiqGSOHUhdZCjNqk21wHwNEDWhJgkuR9LtZAhzA9ZB0agP4W89tEZBRbcVUGTJSPPSUwLUYjmEh6XQ7X1rL850EZD";
+    String accessToken = "CAAEz5omIYVQBAC1cGXJUy88bfp0a0pGykvSVoDVxjjWV4cDmAz9PlOCjF3AaJYo4oBNLS72dZBZCkzIb8BTpRYPZA216EZAo"
+            + "TcryXQqU3X5zXK2f6ZCOZA3dN7KnHjz4GcyoA3pDasttSscfLoy66XwR6yflzhPZCK5AC55hD6RZA0sI0q3kyqtW2HcqWTocA2gZD";
 
     AccessDatabase helloDb = new AccessDatabase();
     // String accessToken = "";
 
     FacebookGraphService uri = new FacebookGraphService(fca, accountId, accessToken);
+    
+    long campaignId = 6016078198937l;
+    long adsetId = 6017202488337l;
+    long adgroupId = 6017202505337l;
 
     public TestBuildingURI() throws Exception {
         // accessToken = helloDb.getFacebookAccounts("53329000").get("access_token");
 
     }
 
-    long campaignId = 6017202486337l;
-    long adsetId = 6017202488337l;
-    long adgroupId = 6017202505337l;
+    public void downloadGroupsForCampaign(long campaignId) throws Exception {
 
-    @Test
+        List<Ads_campaign> adCampaignList = uri.getAllAdsetsInCampaign(campaignId);
+        int size = adCampaignList.size();
+        AccessDatabase accessDB = new AccessDatabase();
+
+        for (int i = 0; i < size; i++) {
+            log.info(adCampaignList.get(i).getId());
+            log.info(adCampaignList.get(i).getName());
+            log.info(adCampaignList.get(i).getCampaign_group_id());
+            log.info(adCampaignList.get(i).getStart_time());
+            log.info(adCampaignList.get(i).getDaily_budget());
+            log.info(adCampaignList.get(i).getCampaign_status());
+
+            long campaignGroupId = adCampaignList.get(i).getCampaign_group_id();
+            int facebookCampaignId = accessDB.getFacebookCampaignId(campaignGroupId);
+            accessDB.addFacebookGroup(facebookCampaignId, adCampaignList.get(i).getName(), adCampaignList.get(i).getId(), adCampaignList.get(i).getCampaign_status(), adCampaignList.get(i)
+                    .getDaily_budget());
+        }
+    }
+
+      @Test
     public void testGetAdsGroup() throws Exception {
 
         Ads_adgroup adgroup = uri.getAdsGroup(adgroupId);
@@ -57,20 +79,21 @@ public class TestBuildingURI {
     }
 
     @Test
-    public void testGetAllAdSetsInCampaign() throws Exception {
+    public void testGetAllGroupsInCampaign() throws Exception {
 
         List<Ads_campaign> adSetsList = uri.getAllAdsetsInCampaign(campaignId);
-        int i = 0;
+        int i = adSetsList.size() - 1;
 
         log.info(adSetsList.size());
         log.info(adSetsList.get(i).getAccount_id());
         log.info(adSetsList.get(i).getName());
         log.info(adSetsList.get(i).getCampaign_group_id());
         log.info(adSetsList.get(i).getStart_time());
+
     }
 
     @Test
-    public void testGetAdSet() throws Exception { // getGroup()
+    public void testGetGroup() throws Exception { // getGroup()
 
         Ads_campaign adCampaign = uri.getAdset(adsetId);
 
@@ -102,11 +125,12 @@ public class TestBuildingURI {
 
         int size = adCampaignGroupList.size();
         log.info("Total Campaigns: " + size);
+        adCampaignGroupList.get(0).getId();
 
     }
 
     @Test
-    public void testWriteCampaignsToDatabase() throws Exception {
+    public void testDownloadAllCampaigns() throws Exception {
 
         List<Ads_campaign_group> adCampaignGroupList = uri.getAllCampaigns();
 
@@ -115,13 +139,31 @@ public class TestBuildingURI {
 
         AccessDatabase accessDB = new AccessDatabase();
         for (int i = 0; i < size; i++) {
-            accessDB.addFacebookCampaign(
-                    adCampaignGroupList.get(i).getName(), 
-                    adCampaignGroupList.get(i).getAccount_id(), 
-                    adCampaignGroupList.get(i).getId(), 
-                    adCampaignGroupList.get(i).getCampaign_group_status());
+            accessDB.addFacebookCampaign(adCampaignGroupList.get(i).getName(), adCampaignGroupList.get(i).getAccount_id(), adCampaignGroupList.get(i).getId(), adCampaignGroupList.get(i)
+                    .getCampaign_group_status());
         }
 
+    }
+
+    @Test
+    public void testDownloadGroupsForListOfCampaigns() throws Exception {
+
+        List<Long> campaignList = new ArrayList<Long>();
+
+        List<Ads_campaign_group> adCampaignGroupList = uri.getAllCampaigns();
+
+        int size = adCampaignGroupList.size();
+//        log.info("Total Campaigns: " + size);
+
+        adCampaignGroupList.get(0).getId();
+
+        for (int i = 0; i < size; i++) {
+            campaignList.add(adCampaignGroupList.get(i).getId());
+        }
+        log.info("campaignList size "+campaignList.size());
+        
+        for (long campaign : campaignList)
+            downloadGroupsForCampaign(campaign);
     }
 
     @Test
