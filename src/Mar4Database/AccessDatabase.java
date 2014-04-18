@@ -3,9 +3,12 @@ package Mar4Database;
 import com.mysql.jdbc.PreparedStatement;
 
 import org.apache.log4j.Logger;
+import org.codehaus.jackson.map.ObjectMapper;
 
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class AccessDatabase {
@@ -17,8 +20,9 @@ public class AccessDatabase {
 
     Connection dbConnection = null;
     PreparedStatement preparedStatement = null;
+    ObjectMapper jsonMapper = new ObjectMapper();
 
-    public Connection getDBConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+    public Connection getMyDBConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
 
         String host = "localhost";
         String database = "/FacebookDatabase";
@@ -31,6 +35,98 @@ public class AccessDatabase {
         Connection conn = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + database, login, password);
         return conn;
 
+    }
+    
+    public Connection getDBConnection() throws InstantiationException, IllegalAccessException, ClassNotFoundException, SQLException {
+
+        String host = "tesla";
+        String database = "/marin";
+        String port = "3306";
+        String login = "marin";
+        String password = "wawptw";
+        String driver = "com.mysql.jdbc.Driver";
+        Class.forName(driver).newInstance();
+
+        Connection conn = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + database, login, password);
+        return conn;
+
+    }
+    
+ // returns ArrayList of Behaviours <id , name > format
+    public ArrayList<HashMap<String, String>> getPartnerCategoriesFromDatabase(String audienceTemplate) throws Exception {
+
+        ArrayList<HashMap<String, String>> behaviorList =  new ArrayList<HashMap<String, String>>();
+        String partnerCategories = null;
+         try {
+            log.info("Database connection established");
+            Statement statment = getDBConnection().createStatement();
+            statment.executeQuery("use marin"); 
+
+            String queryStr = "select partner_categories from facebook_targets_v2, templates  where templates.`publisher_object_id` = facebook_targets_v2.facebook_target_id "
+                    + "and templates.template_name = '" + audienceTemplate + "' ;";
+            statment.executeQuery(queryStr);
+            ResultSet rs = statment.getResultSet();
+            while (rs.next()) {
+                partnerCategories = rs.getString("partner_categories");
+            }
+            rs.close();
+            statment.close();
+            behaviorList =jsonMapper.readValue(partnerCategories, ArrayList.class);
+    
+        }
+        catch (Exception e) {
+            System.err.println();
+            log.info(e);
+        }
+        finally {
+            
+
+            }
+       
+
+        return behaviorList;
+    }
+
+    public ArrayList < HashMap<String, String >> getFacebookCategoriesFromDatabase(String audienceTemplate) throws Exception {
+    
+        Map<String, ArrayList < HashMap<String, String >>> response = new HashMap<String, ArrayList < HashMap<String, String >>>();
+        
+        ArrayList < HashMap<String, String >> behaviorList = new ArrayList < HashMap<String, String >>();
+        String facebookCategories = "";
+        try {
+            log.info("Database connection established");
+            Statement statment = getDBConnection().createStatement();
+            statment.executeQuery("use marin");// client_id=" + clientId);
+
+            String queryStr = "select  facebook_categories from facebook_targets_v2, templates  where templates.`publisher_object_id` = facebook_targets_v2.facebook_target_id "
+                    + "and templates.template_name = '" + audienceTemplate + "' ;";
+            statment.executeQuery(queryStr);
+            ResultSet rs = statment.getResultSet();
+            while (rs.next()) {
+            facebookCategories = rs.getString("facebook_categories");
+            }
+            rs.close();
+            statment.close();
+            response = jsonMapper.readValue(facebookCategories, Map.class);
+            behaviorList = response.get("behaviors") ;
+            
+        }
+        catch (Exception e) {
+            System.err.println();
+            log.info(e);
+        }
+        finally {
+            if (getDBConnection() != null) {
+                try {
+                    getDBConnection().close();
+                    log.info("Database connection terminated");
+                }
+                catch (Exception e) { /* ignore close errors */
+                }
+
+            }
+        }
+        return behaviorList;
     }
 
     private static java.sql.Timestamp getCurrentTimeStamp() {

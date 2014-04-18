@@ -3,6 +3,8 @@ package Mar4Database;
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class TestDatabaseAccess {
@@ -46,6 +48,36 @@ public class TestDatabaseAccess {
 
         accessDb.updateFacebookCampaign("Auto_PagePostBulkupload", 53329000, "PAUSED");
 
+    }
+    
+    @Test
+    public void testFacebookCategories() throws Exception {
+
+        
+        ArrayList<HashMap<String, String>> behaviourList = accessDb.getFacebookCategoriesFromDatabase("Audience");
+        
+        int size =behaviourList.size();
+        for(int j = 0; j < size ; j++)
+        {
+            log.info(behaviourList.get(j).get("name"));
+        }
+        
+
+    }
+
+    @Test
+    public void testPartnerCategories() throws Exception {
+    
+        
+        ArrayList<HashMap<String, String>> behaviourList = accessDb.getPartnerCategoriesFromDatabase("Behavior_template");
+        
+        int size =behaviourList.size();
+        for(int j = 0; j < size ; j++)
+        {
+            log.info(behaviourList.get(j).get("name"));
+        }
+        
+    
     }
     
 
