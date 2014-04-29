@@ -41,6 +41,7 @@ public class FacebookGraphService extends AbstractJsonRestService {
             FIELDS_PARAM_NAME = "fields",
             // campaign group level
             CAMPAIGN_GROUP_COMPONENT = "adcampaign_groups",
+            CONNECTION_OBJECT_COMPONENT = "connectionobjects",
             // group level
             CAMPAIGN_COMPONENT = "adcampaigns";
 
@@ -98,6 +99,23 @@ public class FacebookGraphService extends AbstractJsonRestService {
         }
         return returnList;
 
+    }
+    
+    public void getConnectionObjects() throws NullPointerException, URISyntaxException, JsonGenerationException, JsonMappingException, IOException{
+        
+        Map<String, Object> params = new HashMap<String, Object>();
+
+        params.put(FIELDS_PARAM_NAME, FacebookFieldParamsUtil.getCommaSeparatedClassFieldNames(Ads_account.class));
+        log.info("Params are: " + params);
+        FacebookURIBuilder uriBuilder = fbURIBuilderFactory.createURIBuilder(params, getAccountIdComponent(), CONNECTION_OBJECT_COMPONENT);
+        uriBuilder.getEncodedParams();
+    
+        uriBuilder.getEncodedParams();
+
+        log.info(FacebookUtils.decode(uriBuilder.build().toString()));
+        Ads_account ads_account = callGETMethod(uriBuilder, Ads_account.class);
+
+        
     }
 
     public Ads_account getAccount() throws NullPointerException, URISyntaxException, JsonGenerationException, JsonMappingException, IOException {

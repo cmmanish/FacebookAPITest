@@ -2,6 +2,7 @@ package Mar4API;
 
 import Mar4Database.AccessDatabase;
 
+import com.facebook.api.Ads_account;
 import com.facebook.api.Ads_adgroup;
 import com.facebook.api.Ads_campaign;
 import com.facebook.api.Ads_campaign_group;
@@ -184,10 +185,10 @@ public class TestBuildingURI {
     @Test
     public void testGetAccount() throws Exception {
 
-        // Ads_account ads_account = uri.getAccount();
-        // log.info(ads_account.getAccount_id());
-        // log.info(ads_account.getName());
-        // log.info(ads_account.getCurrency());
+         Ads_account ads_account = uri.getAccount();
+         log.info(ads_account.getAccount_id());
+         log.info(ads_account.getName());
+         log.info(ads_account.getCurrency());
     }
 
 }
