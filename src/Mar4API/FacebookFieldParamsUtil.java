@@ -38,7 +38,8 @@ public class FacebookFieldParamsUtil {
         IGNORE_FIELDS.add("__equalsCalc");
         IGNORE_FIELDS.add("__hashCodeCalc");
         IGNORE_FIELDS.add("typeDesc");
-
+        IGNORE_FIELDS.add("users");
+        
         // Error is not one of the params used to read a Facebook object
         // but only used when Facebook responds with an error
         IGNORE_FIELDS.add("error");

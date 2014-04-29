@@ -7,14 +7,11 @@ import com.facebook.api.Ads_adgroup;
 import com.facebook.api.Ads_campaign;
 import com.facebook.api.Ads_campaign_group;
 import com.facebook.api.Ads_connection;
-
 import org.apache.log4j.Logger;
 import org.junit.Test;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class TestBuildingURI {
     private final Logger log = Logger.getLogger(TestBuildingURI.class);
@@ -25,17 +22,15 @@ public class TestBuildingURI {
     String accessToken = "CAAEz5omIYVQBAC1cGXJUy88bfp0a0pGykvSVoDVxjjWV4cDmAz9PlOCjF3AaJYo4oBNLS72dZBZCkzIb8BTpRYPZA216EZAo"
             + "TcryXQqU3X5zXK2f6ZCOZA3dN7KnHjz4GcyoA3pDasttSscfLoy66XwR6yflzhPZCK5AC55hD6RZA0sI0q3kyqtW2HcqWTocA2gZD";
 
-    AccessDatabase helloDb = new AccessDatabase();
-    // String accessToken = "";
 
     FacebookGraphService uri = new FacebookGraphService(fca, accountId, accessToken);
-    
+
     long campaignId = 6016078198937l;
     long adsetId = 6017202488337l;
     long adgroupId = 6017202505337l;
 
     public TestBuildingURI() throws Exception {
-        // accessToken = helloDb.getFacebookAccounts("53329000").get("access_token");
+
 
     }
 
@@ -54,13 +49,14 @@ public class TestBuildingURI {
             log.info(adCampaignList.get(i).getCampaign_status());
 
             long campaignGroupId = adCampaignList.get(i).getCampaign_group_id();
-            int facebookCampaignId = accessDB.getFacebookCampaignId(campaignGroupId);
-            accessDB.addFacebookGroup(facebookCampaignId, adCampaignList.get(i).getName(), adCampaignList.get(i).getId(), adCampaignList.get(i).getCampaign_status(), adCampaignList.get(i)
-                    .getDaily_budget());
+/*            int facebookCampaignId = accessDB.getFacebookCampaignId(campaignGroupId);
+            accessDB.addFacebookGroup(facebookCampaignId, adCampaignList.get(i).getName(), adCampaignList.get(i).getId(),
+                    adCampaignList.get(i).getCampaign_status(), adCampaignList.get(i).getDaily_budget());
+                    */
         }
     }
 
-      @Test
+    @Test
     public void testGetAdsGroup() throws Exception {
 
         Ads_adgroup adgroup = uri.getAdsGroup(adgroupId);
@@ -133,6 +129,56 @@ public class TestBuildingURI {
     }
 
     @Test
+    public void testGetAllGroups() throws Exception {
+
+        List<Ads_campaign> adSetsList = uri.getAllAdsets();
+        log.info(adSetsList.size());
+        int i = 0;
+
+        log.info(adSetsList.get(i).getId());
+        log.info(adSetsList.get(i).getName());
+        log.info(adSetsList.get(i).getDaily_budget());
+        log.info(adSetsList.get(i).getLifetime_budget());
+        log.info(adSetsList.get(i).getStart_time());
+        log.info(adSetsList.get(i).getEnd_time());
+    }
+
+    @Test
+    public void testGetAccount() throws Exception {
+
+        Ads_account ads_account = uri.getAccount();
+        log.info(ads_account.getAccount_id());
+        log.info(ads_account.getName());
+        log.info(ads_account.getAccount_status());
+        log.info(ads_account.getTimezone_id());
+        log.info(ads_account.getDaily_spend_limit());
+        log.info(ads_account.getCurrency());
+    }
+
+    @Test
+    public void testGetConnections() throws Exception {
+
+        List<Ads_connection> ads_connectionList = uri.getConnections();
+
+        log.info(ads_connectionList.get(0).getId());
+        log.info(ads_connectionList.get(0).getName());
+
+    }
+
+    @Test
+    public void testGetOffsitePixels() throws Exception {
+
+        List<Map<String, Object>> offsitePixelList = uri.getOffsitePixels(20);
+        log.info(offsitePixelList.get(0).get("id"));
+        log.info(offsitePixelList.get(0).get("name"));
+        log.info(offsitePixelList.get(0).get("tag"));
+        log.info(offsitePixelList.get(0).get("status"));
+        log.info(offsitePixelList.get(0).get("creator"));
+        log.info(offsitePixelList.get(0).get("js_pixel"));
+
+    }
+
+    @Test
     public void testDownloadAllCampaigns() throws Exception {
 
         List<Ads_campaign_group> adCampaignGroupList = uri.getAllCampaigns();
@@ -156,51 +202,17 @@ public class TestBuildingURI {
         List<Ads_campaign_group> adCampaignGroupList = uri.getAllCampaigns();
 
         int size = adCampaignGroupList.size();
-//        log.info("Total Campaigns: " + size);
+        //        log.info("Total Campaigns: " + size);
 
         adCampaignGroupList.get(0).getId();
 
         for (int i = 0; i < size; i++) {
             campaignList.add(adCampaignGroupList.get(i).getId());
         }
-        log.info("campaignList size "+campaignList.size());
-        
+        log.info("campaignList size " + campaignList.size());
+
         for (long campaign : campaignList)
             downloadGroupsForCampaign(campaign);
-    }
-
-    @Test
-    public void testGetAllGroups() throws Exception {
-
-        List<Ads_campaign> adSetsList = uri.getAllAdsets();
-        log.info(adSetsList.size());
-        int i = 0;
-
-        log.info(adSetsList.get(i).getId());
-        log.info(adSetsList.get(i).getName());
-        log.info(adSetsList.get(i).getDaily_budget());
-        log.info(adSetsList.get(i).getLifetime_budget());
-        log.info(adSetsList.get(i).getStart_time());
-        log.info(adSetsList.get(i).getEnd_time());
-    }
-
-    @Test
-    public void testGetAccount() throws Exception {
-
-         Ads_account ads_account = uri.getAccount();
-         log.info(ads_account.getAccount_id());
-         log.info(ads_account.getName());
-         log.info(ads_account.getCurrency());
-    }
-    
-    @Test
-    public void testGetConnections() throws Exception {
-
-        List<Ads_connection> ads_connectionList = uri.getConnections();
-        
-        log.info(ads_connectionList.get(0).getId());
-        log.info(ads_connectionList.get(0).getName());
-         
     }
 
 }

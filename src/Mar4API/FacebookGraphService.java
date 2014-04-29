@@ -86,6 +86,7 @@ public class FacebookGraphService extends AbstractJsonRestService {
         String result = restCall(uri, String.class);
 
         log.info("Result : " + result);
+        @SuppressWarnings("unchecked")
         Map<String, Object> response = this.jsonMapper.readValue(result, HashMap.class);
 
         List<T> returnList = new ArrayList<T>();
@@ -140,6 +141,7 @@ public class FacebookGraphService extends AbstractJsonRestService {
 
             FacebookURIBuilder uriBuilder = fbURIBuilderFactory.createURIBuilder(params, getAccountIdComponent(), OFFSITE_PIXELS_COMPONENT);
             
+            log.info(FacebookUtils.decode(uriBuilder.build().toString()));
             response = callGETMethod(uriBuilder, HashMap.class);
             if (response != null) {
                 instanceData = (List<Map<String, Object>>) response.get(DATA);
@@ -151,6 +153,7 @@ public class FacebookGraphService extends AbstractJsonRestService {
         return instanceData;
     }
     
+    //need to see what we are getting id in the response
     public Ads_account getAccount() throws NullPointerException, URISyntaxException, JsonGenerationException, JsonMappingException, IOException {
         Map<String, Object> params = new HashMap<String, Object>();
 
