@@ -6,11 +6,13 @@ import com.facebook.api.Ads_account;
 import com.facebook.api.Ads_adgroup;
 import com.facebook.api.Ads_campaign;
 import com.facebook.api.Ads_campaign_group;
+import com.facebook.api.Ads_connection;
 
 import org.apache.log4j.Logger;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -189,6 +191,16 @@ public class TestBuildingURI {
          log.info(ads_account.getAccount_id());
          log.info(ads_account.getName());
          log.info(ads_account.getCurrency());
+    }
+    
+    @Test
+    public void testGetConnections() throws Exception {
+
+        List<Ads_connection> ads_connectionList = uri.getConnections();
+        
+        log.info(ads_connectionList.get(0).getId());
+        log.info(ads_connectionList.get(0).getName());
+         
     }
 
 }
