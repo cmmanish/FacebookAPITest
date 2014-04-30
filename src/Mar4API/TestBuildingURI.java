@@ -106,6 +106,20 @@ public class TestBuildingURI {
     }
 
     @Test
+    public void testCreateCampaigns() throws Exception {
+
+        Ads_campaign_group campaign = new Ads_campaign_group();
+        
+        campaign.setObjective("");
+        campaign.setAccount_id(accountId);
+        campaign.setName("abc");
+        campaign.setCampaign_group_status("Active");
+        
+        uri.createCampaign(campaign);
+
+        
+    }
+    @Test
     public void testGetCampaign() throws Exception {
 
         Ads_campaign_group adCampaignGroup = uri.getCampaign(campaignId);

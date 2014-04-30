@@ -39,11 +39,9 @@ public class FacebookGraphService extends AbstractJsonRestService {
 
     DATE_FORMAT_PARAM_KEY = "date_format", DEFAULT_DATE_FORMAT = "U", // returns datetimes in Unix time, because fb defaults to different time conventions all over the place
             // for paging use
-            OFFSET_KEY = "offset",
-            LIMIT_KEY = "limit",
-            LIMIT = "limit", LIMIT_VALUE = "250", DATA = "data", COUNT = "count", ACCOUNT_PREFIX = "act_", FIELDS_PARAM_NAME = "fields",
+            OFFSET_KEY = "offset", LIMIT_KEY = "limit", LIMIT = "limit", LIMIT_VALUE = "250", DATA = "data", COUNT = "count", ACCOUNT_PREFIX = "act_", FIELDS_PARAM_NAME = "fields",
             // campaign group level
-            CAMPAIGN_GROUP_COMPONENT = "adcampaign_groups", CONNECTION_COMPONENT = "connectionobjects",OFFSITE_PIXELS_COMPONENT = "offsitepixels",
+            CAMPAIGN_GROUP_COMPONENT = "adcampaign_groups", CONNECTION_COMPONENT = "connectionobjects", OFFSITE_PIXELS_COMPONENT = "offsitepixels",
             // group level
             CAMPAIGN_COMPONENT = "adcampaigns";
 
@@ -70,10 +68,34 @@ public class FacebookGraphService extends AbstractJsonRestService {
         return ACCOUNT_PREFIX + String.valueOf(fca.getAccountId());
     }
 
+    /**
+     * given an object return a map based on the json representation.
+     * converts object to json string to Map
+     * 
+     * @param jsonObj
+     *        the object to get a map of
+     * @return map representation of the object
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> jsonObjectToMap(Object jsonObj) throws Exception {
+        String jsonString = this.jsonMapper.writeValueAsString(jsonObj);
+        return this.jsonMapper.readValue(jsonString, HashMap.class);
+    }
+
     public <T> T callGETMethod(FacebookURIBuilder facebookUriBuilder, Class<T> returnType) throws NullPointerException, URISyntaxException, JsonGenerationException, JsonMappingException, IOException {
 
         URI uri = facebookUriBuilder.build();
-        String result = restCall(uri, String.class);
+        String result = GETCall(uri, String.class);
+        log.info("result: " + result);
+
+        return this.jsonMapper.readValue(result, returnType);
+    }
+
+    public <T> T callPOSTMethod(FacebookURIBuilder facebookUriBuilder, Class<T> returnType) throws NullPointerException, URISyntaxException, JsonGenerationException, JsonMappingException, IOException {
+
+        URI uri = facebookUriBuilder.build();
+        String result = POSTCall(uri, null, String.class);
         log.info("result: " + result);
 
         return this.jsonMapper.readValue(result, returnType);
@@ -83,7 +105,7 @@ public class FacebookGraphService extends AbstractJsonRestService {
             JsonMappingException, IOException {
 
         URI uri = facebookUriBuilder.build();
-        String result = restCall(uri, String.class);
+        String result = GETCall(uri, String.class);
 
         log.info("Result : " + result);
         @SuppressWarnings("unchecked")
@@ -115,9 +137,9 @@ public class FacebookGraphService extends AbstractJsonRestService {
         FacebookURIBuilder uriBuilder = fbURIBuilderFactory.createURIBuilder(getAccountIdComponent(), CONNECTION_COMPONENT);
 
         log.info(FacebookUtils.decode(uriBuilder.build().toString()));
-        
+
         Ads_connections_response response = callGETMethod(uriBuilder, Ads_connections_response.class);
-        
+
         if (ArrayUtils.isNotEmpty(response.getData())) {
             connections.addAll(Arrays.asList(response.getData()));
         }
@@ -125,10 +147,12 @@ public class FacebookGraphService extends AbstractJsonRestService {
         return connections;
 
     }
-    
+
     /**
      * Retrieve all of the offsite pixels
-     * @param limit The max number of return objects
+     * 
+     * @param limit
+     *        The max number of return objects
      * @return List of all instances of the offsite pixels
      */
     @SuppressWarnings("unchecked")
@@ -140,20 +164,21 @@ public class FacebookGraphService extends AbstractJsonRestService {
             params.put(LIMIT_KEY, limit);
 
             FacebookURIBuilder uriBuilder = fbURIBuilderFactory.createURIBuilder(params, getAccountIdComponent(), OFFSITE_PIXELS_COMPONENT);
-            
+
             log.info(FacebookUtils.decode(uriBuilder.build().toString()));
             response = callGETMethod(uriBuilder, HashMap.class);
             if (response != null) {
                 instanceData = (List<Map<String, Object>>) response.get(DATA);
             }
-        } catch (Exception e) {
-           log.error("Error retrieving offsite pixels", e);
+        }
+        catch (Exception e) {
+            log.error("Error retrieving offsite pixels", e);
         }
 
         return instanceData;
     }
-    
-    //need to see what we are getting id in the response
+
+    // need to see what we are getting id in the response
     public Ads_account getAccount() throws NullPointerException, URISyntaxException, JsonGenerationException, JsonMappingException, IOException {
         Map<String, Object> params = new HashMap<String, Object>();
 
@@ -194,6 +219,16 @@ public class FacebookGraphService extends AbstractJsonRestService {
         });
 
         return adCampaignGroupList;
+
+    }
+
+    public void createCampaign(Ads_campaign_group campaign) throws Exception {
+
+        Map<String, Object> params = jsonObjectToMap(campaign);
+        FacebookURIBuilder uriBuilder = fbURIBuilderFactory.createURIBuilder(params, getAccountIdComponent(), CAMPAIGN_GROUP_COMPONENT);
+        log.info(FacebookUtils.decode(uriBuilder.build().toString()));
+
+        // List<Ads_campaign_group> createCampaignResultList = callPOSTMethod(createCampaignRelativeUrl, Ads_campaign_group.class,null);
 
     }
 

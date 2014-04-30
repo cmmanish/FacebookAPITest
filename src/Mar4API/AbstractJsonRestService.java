@@ -29,12 +29,16 @@ public abstract class AbstractJsonRestService {
 
     }
 
-    protected <T> T restCall(URI uri, Class<T> returnType) throws JsonGenerationException, JsonMappingException, IOException {
-
+    protected <T> T GETCall(URI uri, Class<T> returnType) throws JsonGenerationException, JsonMappingException, IOException {
         T response = this.restTemplate.getForObject(uri, returnType);
 
         return response;
 
     }
 
+    protected <T> T POSTCall(URI uri, Class<T> returnClass, Object upload) throws JsonGenerationException, JsonMappingException, IOException {
+        T response = this.restTemplate.postForObject(uri, upload, returnClass);
+        
+        return response;
+    }
 }
