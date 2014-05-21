@@ -7,8 +7,10 @@ import com.facebook.api.Ads_adgroup;
 import com.facebook.api.Ads_campaign;
 import com.facebook.api.Ads_campaign_group;
 import com.facebook.api.Ads_connection;
+
 import org.apache.log4j.Logger;
 import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -54,6 +56,19 @@ public class TestBuildingURI {
                     adCampaignList.get(i).getCampaign_status(), adCampaignList.get(i).getDaily_budget());
                     */
         }
+    }
+
+    @Test
+    public void testSetCampaigns() throws Exception {
+    
+        Ads_campaign_group campaign = new Ads_campaign_group();
+        
+        campaign.setAccount_id(accountId);
+        campaign.setName("abc");
+        campaign.setCampaign_group_status("ACTIVE");
+        
+        uri.createCampaign(campaign);
+    
     }
 
     @Test
@@ -106,27 +121,12 @@ public class TestBuildingURI {
     }
 
     @Test
-    public void testCreateCampaigns() throws Exception {
-
-        Ads_campaign_group campaign = new Ads_campaign_group();
-        
-        campaign.setObjective("");
-        campaign.setAccount_id(accountId);
-        campaign.setName("abc");
-        campaign.setCampaign_group_status("Active");
-        
-        uri.createCampaign(campaign);
-
-        
-    }
-    @Test
     public void testGetCampaign() throws Exception {
 
         Ads_campaign_group adCampaignGroup = uri.getCampaign(campaignId);
 
         log.info("CAMPAIGN LEVEL: ");
         log.info("Account: " + adCampaignGroup.getAccount_id());
-        log.info("ID: " + adCampaignGroup.getId());
         log.info("Name: " + adCampaignGroup.getName());
         log.info("Status: " + adCampaignGroup.getCampaign_group_status());
     }

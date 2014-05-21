@@ -225,10 +225,11 @@ public class FacebookGraphService extends AbstractJsonRestService {
     public void createCampaign(Ads_campaign_group campaign) throws Exception {
 
         Map<String, Object> params = jsonObjectToMap(campaign);
+        
         FacebookURIBuilder uriBuilder = fbURIBuilderFactory.createURIBuilder(params, getAccountIdComponent(), CAMPAIGN_GROUP_COMPONENT);
-        log.info(FacebookUtils.decode(uriBuilder.build().toString()));
 
-        // List<Ads_campaign_group> createCampaignResultList = callPOSTMethod(createCampaignRelativeUrl, Ads_campaign_group.class,null);
+        log.info(uriBuilder.getPathParam());
+        callPOSTMethod(uriBuilder, Ads_campaign_group.class);
 
     }
 
